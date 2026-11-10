@@ -1,7 +1,8 @@
 
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, BarChart3, Zap, Sparkles } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { CheckCircle2, BarChart3, Zap, Shield, Sparkles } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
 
@@ -32,9 +33,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             {isAuthenticated && (
-              <Button variant="ghost" onClick={() => setLocation("/dashboard")}>
-                Dashboard
-              </Button>
+              <Button variant="ghost" onClick={() => setLocation("/dashboard")}>Dashboard</Button>
             )}
           </div>
         </div>
@@ -89,6 +88,7 @@ export default function Home() {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative bg-white rounded-2xl shadow-2xl p-8 border border-slate-200 overflow-hidden">
+              {/* Mock UI for Visual Power */}
               <div className="space-y-6">
                 <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
                   <div>
@@ -102,11 +102,8 @@ export default function Home() {
                     <div className="h-full w-[92%] bg-gradient-to-r from-blue-500 to-indigo-500"></div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {["Python", "SQL", "Cloud", "Agile"].map((s) => (
-                      <span
-                        key={s}
-                        className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-md border border-green-100"
-                      >
+                    {["Python", "SQL", "Cloud", "Agile"].map(s => (
+                      <span key={s} className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-md border border-green-100">
                         {s}
                       </span>
                     ))}
@@ -121,31 +118,15 @@ export default function Home() {
       {/* How it Works */}
       <section className="bg-white py-24 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-16">
-            Three steps to a perfect resume
-          </h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-16">Three steps to a perfect resume</h2>
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              {
-                step: "01",
-                title: "Upload PDF",
-                desc: "Drag and drop your current resume. We support all standard PDF formats.",
-              },
-              {
-                step: "02",
-                title: "AI Analysis",
-                desc: "Our engine compares your text against real-world job descriptions.",
-              },
-              {
-                step: "03",
-                title: "Optimize",
-                desc: "Use our AI coach to rewrite bullets and fill missing keyword gaps.",
-              },
+              { step: "01", title: "Upload PDF", desc: "Drag and drop your current resume. We support all standard PDF formats." },
+              { step: "02", title: "AI Analysis", desc: "Our engine compares your text against real-world job descriptions." },
+              { step: "03", title: "Optimize", desc: "Use our AI coach to rewrite bullets and fill missing keyword gaps." }
             ].map((item, i) => (
               <div key={i} className="space-y-4">
-                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto text-xl font-bold">
-                  {item.step}
-                </div>
+                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto text-xl font-bold">{item.step}</div>
                 <h3 className="text-xl font-bold">{item.title}</h3>
                 <p className="text-slate-600">{item.desc}</p>
               </div>
@@ -160,43 +141,26 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12 border-b border-slate-800 pb-12">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">
-                  A
-                </div>
+                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">A</div>
                 <span className="text-white font-bold text-xl">ATS Optimizer</span>
               </div>
               <p className="max-w-xs text-sm text-slate-400">
                 The ultimate career development tool for students and professionals. Built with advanced AI to boost your interview success.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
               <div className="space-y-4">
                 <p className="text-white font-semibold">Project</p>
                 <div className="flex flex-col gap-2 text-sm">
-                  <span
-                    className="hover:text-white cursor-pointer"
-                    onClick={() => setLocation("/upload")}
-                  >
-                    Analyze
-                  </span>
-                  <span
-                    className="hover:text-white cursor-pointer"
-                    onClick={() => setLocation("/tools")}
-                  >
-                    Tools
-                  </span>
-                  <span
-                    className="hover:text-white cursor-pointer"
-                    onClick={() => setLocation("/templates")}
-                  >
-                    Templates
-                  </span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setLocation("/upload")}>Analyze</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setLocation("/tools")}>Tools</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setLocation("/templates")}>Templates</span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-6 text-center text-xs text-slate-400">
-            Developed by Saharoz Shahid.
+          <div className="border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+            <p>Developed by Saharoz Shahid.</p>
           </div>
         </div>
       </footer>
