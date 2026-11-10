@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Upload as UploadIcon, FileText, Loader2, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { JOB_ROLES } from "@shared/const";
 
@@ -85,16 +87,31 @@ export default function Upload() {
     let successIds: number[] = [];
 
     try {
+      const { data: { session }, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error("Please log in before uploading your resume.");
+      }
+
+      const authHeaders = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append("file", file);
 
         const uploadResponse = await fetch("/api/upload", {
           method: "POST",
+          headers: authHeaders,
           body: formData,
         });
 
-        if (!uploadResponse.ok) throw new Error(`Upload failed for ${file.name}`);
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed for ${file.name}: ${uploadResponse.status}`);
+        }
+
         const { fileKey, fileUrl, rawText } = await uploadResponse.json();
 
         const resumeResult = await uploadMutation.mutateAsync({
@@ -106,21 +123,29 @@ export default function Upload() {
 
         const analysisResponse = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
+          headers: {
+            ...authHeaders,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             resumeText: rawText,
-            roleKey: selectedRole
+            roleKey: selectedRole,
           }),
         });
 
-        if (!analysisResponse.ok) throw new Error(`Analysis failed for ${file.name}`);
+        if (!analysisResponse.ok) {
+          throw new Error(`Analysis failed for ${file.name}: ${analysisResponse.status}`);
+        }
+
         const analysis = await analysisResponse.json();
 
         const resumeId = (resumeResult as any)?.id;
-        if (!resumeId) throw new Error("Failed to get resume ID from response");
+        if (!resumeId) {
+          throw new Error("Failed to get resume ID from response");
+        }
 
         await analysisMutation.mutateAsync({
-          resumeId: resumeId,
+          resumeId,
           internScore: analysis.internScore,
           jobScore: analysis.jobScore,
           matchedKeywordsIntern: analysis.matchedKeywordsIntern,
@@ -131,11 +156,12 @@ export default function Upload() {
           recommendations: analysis.recommendations,
           skillMatrix: analysis.skillMatrix,
         });
-        
+
         successIds.push(resumeId);
       }
 
       toast.success(successIds.length > 1 ? "Resumes analyzed!" : "Resume analyzed!");
+
       if (successIds.length > 1) {
         setLocation(`/compare?ids=${successIds.join(",")}`);
       } else if (successIds.length === 1) {
@@ -144,6 +170,7 @@ export default function Upload() {
     } catch (error) {
       console.error("Error:", error);
       toast.error(error instanceof Error ? error.message : "An error occurred");
+    } finally {
       setIsAnalyzing(false);
     }
   };
@@ -151,7 +178,6 @@ export default function Upload() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">Upload Your Resume</h1>
           <p className="text-base sm:text-lg text-slate-600">
@@ -159,10 +185,9 @@ export default function Upload() {
           </p>
         </div>
 
-        {/* Role Selection */}
         <Card className="p-6 mb-8 border border-slate-200">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Select Target Role</h3>
-          <select 
+          <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
             className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white font-medium text-slate-700"
@@ -175,7 +200,6 @@ export default function Upload() {
           </select>
         </Card>
 
-        {/* Upload Card */}
         <Card className="p-4 sm:p-8 border-2 border-slate-200">
           <div
             onDragOver={handleDragOver}
@@ -208,7 +232,6 @@ export default function Upload() {
             <p className="text-sm text-slate-500">PDF files only • Max 10MB • You can select multiple</p>
           </div>
 
-          {/* Selected File Display */}
           {selectedFiles.length > 0 && (
             <div className="mt-8 space-y-3">
               {selectedFiles.map((file, i) => (
@@ -235,7 +258,6 @@ export default function Upload() {
             </div>
           )}
 
-          {/* Analyze Button */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <Button
               size="lg"
@@ -264,7 +286,6 @@ export default function Upload() {
           </div>
         </Card>
 
-        {/* Info Section */}
         <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {[
             {
